@@ -12,15 +12,16 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:60',
-            'email' => 'required|email|unique:users',
-            'password' => 'required|min:6|confirmed',
+            'nombre' => 'required|string|max:60',
+            'correo' => 'required|email|unique:usuarios,correo',
+            'password' => 'required|min:8|confirmed',
         ]);
 
         $user = User::create([
-            'name'     => $request->name,
-            'email'    => $request->email,
+            'nombre'   => $request->nombre,
+            'correo'   => $request->correo,
             'password' => Hash::make($request->password),
+            'activo'   => true,
         ]);
 
         return response()->json([
@@ -32,13 +33,13 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $request->validate([
-            'email'    => 'required|email',
+            'correo'   => 'required|email',
             'password' => 'required'
         ]);
 
-        $user = User::where('email', $request->email)->first();
+        $user = User::where('correo', $request->correo)->first();
 
-        if (! $user || ! Hash::check($request->password, $user->password)) {
+        if (! $user || ! $user->activo || ! Hash::check($request->password, $user->password)) {
             return response()->json(['message' => 'Credenciales inválidas'], 401);
         }
 

@@ -9,6 +9,7 @@ return new class extends Migration {
         Schema::create('comite_miembros', function (Blueprint $table) {
             $table->unsignedBigInteger('id_comite');
             $table->unsignedBigInteger('id_usuario');
+            $table->primary(['id_comite', 'id_usuario']);
             $table->timestamps();
 
             $table->foreign('id_comite')->references('id_comite')->on('comites')->onDelete('cascade');

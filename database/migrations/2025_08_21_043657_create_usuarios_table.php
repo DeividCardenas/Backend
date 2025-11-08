@@ -10,7 +10,9 @@ return new class extends Migration {
             $table->bigIncrements('id_usuario');
             $table->string('nombre');
             $table->string('correo')->unique();
+            $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->rememberToken();
             $table->boolean('activo')->default(true);
             $table->timestamps();
         });
