@@ -2,6 +2,14 @@
 
 API REST para gestión de indicadores, comités y usuarios con sistema de roles y permisos.
 
+## 📚 Documentación
+
+- **[Guía de inicio rápido](#instalación)** - Instrucciones de instalación y uso básico
+- **[ARQUITECTURA.md](docs/ARQUITECTURA.md)** - Diseño técnico y arquitectura del sistema
+- **[ORGANIZACION.md](docs/ORGANIZACION.md)** - Estructura de carpetas y organización
+- **[GUIA_DESARROLLO.md](docs/GUIA_DESARROLLO.md)** - Guía completa para desarrolladores
+- **[ANALISIS_TECNICO.md](docs/ANALISIS_TECNICO.md)** - Análisis técnico y verificación
+
 ## Stack Tecnológico
 
 - Laravel 12
