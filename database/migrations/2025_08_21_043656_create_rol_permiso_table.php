@@ -9,6 +9,7 @@ return new class extends Migration {
         Schema::create('rol_permiso', function (Blueprint $table) {
             $table->unsignedBigInteger('id_rol');
             $table->unsignedBigInteger('id_permiso');
+            $table->primary(['id_rol', 'id_permiso']);
 
             $table->foreign('id_rol')->references('id_rol')->on('roles')->onDelete('cascade');
             $table->foreign('id_permiso')->references('id_permiso')->on('permisos')->onDelete('cascade');
