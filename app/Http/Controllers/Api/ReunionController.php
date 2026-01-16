@@ -19,7 +19,7 @@ class ReunionController extends Controller
             $query->where('id_comite', $request->id_comite);
         }
 
-        $reuniones = $query->orderBy('fecha', 'desc')->get();
+        $reuniones = $query->orderBy('fecha', 'desc')->paginate(15);
         return response()->json($reuniones);
     }
 

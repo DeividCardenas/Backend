@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Rol;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use App\Http\Requests\StoreRolRequest;
 use App\Http\Requests\UpdateRolRequest;
 
@@ -12,7 +13,7 @@ class RolController extends Controller
 {
     public function index()
     {
-        $roles = Rol::with('permisos')->get();
+        $roles = Rol::with('permisos')->paginate(15);
         return response()->json($roles);
     }
 
@@ -28,6 +29,8 @@ class RolController extends Controller
         if (isset($validated['permisos'])) {
             $rol->permisos()->attach($validated['permisos']);
         }
+
+        Log::info('Rol creado por ' . $request->user()->correo . ': ' . $rol->nombre);
 
         return response()->json($rol->load('permisos'), 201);
     }
@@ -49,13 +52,19 @@ class RolController extends Controller
             $rol->permisos()->sync($validated['permisos']);
         }
 
+        Log::info('Rol actualizado por ' . $request->user()->correo . ': ' . $rol->nombre);
+
         return response()->json($rol->load('permisos'));
     }
 
     public function destroy($id)
     {
         $rol = Rol::findOrFail($id);
+        $nombre = $rol->nombre;
         $rol->delete();
+
+        Log::info('Rol eliminado por ' . request()->user()->correo . ': ' . $nombre);
+
         return response()->json(['message' => 'Rol eliminado correctamente']);
     }
 }

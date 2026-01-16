@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
 
@@ -13,7 +14,7 @@ class UserController extends Controller
 {
     public function index()
     {
-        $usuarios = User::with('roles')->where('activo', true)->get();
+        $usuarios = User::with('roles')->where('activo', true)->paginate(15);
         return response()->json($usuarios);
     }
 
@@ -31,6 +32,8 @@ class UserController extends Controller
         if (isset($validated['roles'])) {
             $user->roles()->attach($validated['roles']);
         }
+
+        Log::info('Usuario creado por ' . $request->user()->correo . ': ' . $user->correo);
 
         return response()->json($user->load('roles'), 201);
     }
@@ -56,6 +59,8 @@ class UserController extends Controller
             $user->roles()->sync($validated['roles']);
         }
 
+        Log::info('Usuario actualizado por ' . $request->user()->correo . ': ' . $user->correo);
+
         return response()->json($user->load('roles'));
     }
 
@@ -63,6 +68,9 @@ class UserController extends Controller
     {
         $user = User::findOrFail($id);
         $user->update(['activo' => false]);
+
+        Log::info('Usuario desactivado por ' . request()->user()->correo . ': ' . $user->correo);
+
         return response()->json(['message' => 'Usuario desactivado correctamente']);
     }
 }

@@ -12,7 +12,7 @@ class PermisoController extends Controller
 {
     public function index()
     {
-        $permisos = Permiso::all();
+        $permisos = Permiso::paginate(15);
         return response()->json($permisos);
     }
 

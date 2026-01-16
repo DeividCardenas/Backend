@@ -18,7 +18,7 @@ class IndicadorValorController extends Controller
             $query->where('id_indicador', $request->id_indicador);
         }
 
-        $valores = $query->orderBy('fecha', 'desc')->get();
+        $valores = $query->orderBy('fecha', 'desc')->paginate(15);
         return response()->json($valores);
     }
 
