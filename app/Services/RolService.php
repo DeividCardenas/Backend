@@ -7,6 +7,7 @@ use App\DTOs\UpdateRolDTO;
 use App\Models\Rol;
 use App\Models\User;
 use Illuminate\Support\Facades\Log;
+use App\Exceptions\ResourceConflictException;
 
 class RolService
 {
@@ -54,6 +55,10 @@ class RolService
 
     public function deleteRol(Rol $rol, ?User $deleter = null): void
     {
+        if ($rol->usuarios()->count() > 0) {
+            throw new ResourceConflictException("No se puede eliminar el rol '{$rol->nombre}' porque tiene usuarios asignados.");
+        }
+
         $nombre = $rol->nombre;
         $rol->delete();
 

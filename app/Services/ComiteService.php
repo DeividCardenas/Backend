@@ -7,6 +7,7 @@ use App\DTOs\UpdateComiteDTO;
 use App\Models\Comite;
 use App\Models\User;
 use Illuminate\Support\Facades\Log;
+use App\Exceptions\ResourceConflictException;
 
 class ComiteService
 {
@@ -58,6 +59,10 @@ class ComiteService
 
     public function deleteComite(Comite $comite, ?User $deleter = null): void
     {
+        if ($comite->reuniones()->count() > 0) {
+            throw new ResourceConflictException("No se puede eliminar el comité '{$comite->nombre}' porque tiene reuniones registradas.");
+        }
+
         $nombre = $comite->nombre;
         $comite->delete();
 
