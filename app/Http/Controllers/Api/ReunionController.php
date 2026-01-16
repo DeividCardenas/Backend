@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
@@ -11,6 +13,8 @@ use App\Http\Requests\UpdateReunionRequest;
 use App\Services\ReunionService;
 use App\DTOs\CreateReunionDTO;
 use App\DTOs\UpdateReunionDTO;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Http\JsonResponse;
 
 class ReunionController extends Controller
 {
@@ -21,7 +25,7 @@ class ReunionController extends Controller
         $this->reunionService = $reunionService;
     }
 
-    public function index(Request $request)
+    public function index(Request $request): AnonymousResourceCollection
     {
         $query = Reunion::with('comite');
 
@@ -33,7 +37,7 @@ class ReunionController extends Controller
         return ReunionResource::collection($reuniones);
     }
 
-    public function store(StoreReunionRequest $request)
+    public function store(StoreReunionRequest $request): JsonResponse
     {
         $dto = CreateReunionDTO::fromArray($request->validated(), $request->file('archivo_acta'));
         $reunion = $this->reunionService->createReunion($dto);
@@ -42,13 +46,13 @@ class ReunionController extends Controller
             ->setStatusCode(201);
     }
 
-    public function show($id)
+    public function show($id): ReunionResource
     {
         $reunion = Reunion::with('comite')->findOrFail($id);
         return new ReunionResource($reunion);
     }
 
-    public function update(UpdateReunionRequest $request, $id)
+    public function update(UpdateReunionRequest $request, $id): ReunionResource
     {
         $reunion = Reunion::findOrFail($id);
         $dto = UpdateReunionDTO::fromArray($request->validated(), $request->file('archivo_acta'));
@@ -56,7 +60,7 @@ class ReunionController extends Controller
         return new ReunionResource($reunion->load('comite'));
     }
 
-    public function destroy($id)
+    public function destroy($id): JsonResponse
     {
         $reunion = Reunion::findOrFail($id);
         $this->reunionService->deleteReunion($reunion);

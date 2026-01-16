@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
@@ -8,16 +10,18 @@ use Illuminate\Http\Request;
 use App\Http\Resources\PermisoResource;
 use App\Http\Requests\StorePermisoRequest;
 use App\Http\Requests\UpdatePermisoRequest;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Http\JsonResponse;
 
 class PermisoController extends Controller
 {
-    public function index()
+    public function index(): AnonymousResourceCollection
     {
         $permisos = Permiso::paginate(15);
         return PermisoResource::collection($permisos);
     }
 
-    public function store(StorePermisoRequest $request)
+    public function store(StorePermisoRequest $request): JsonResponse
     {
         $validated = $request->validated();
         $permiso = Permiso::create($validated);
@@ -26,13 +30,13 @@ class PermisoController extends Controller
             ->setStatusCode(201);
     }
 
-    public function show($id)
+    public function show($id): PermisoResource
     {
         $permiso = Permiso::with('roles')->findOrFail($id);
         return new PermisoResource($permiso);
     }
 
-    public function update(UpdatePermisoRequest $request, $id)
+    public function update(UpdatePermisoRequest $request, $id): PermisoResource
     {
         $validated = $request->validated();
         $permiso = Permiso::findOrFail($id);
@@ -40,7 +44,7 @@ class PermisoController extends Controller
         return new PermisoResource($permiso);
     }
 
-    public function destroy($id)
+    public function destroy($id): JsonResponse
     {
         $permiso = Permiso::findOrFail($id);
         $permiso->delete();

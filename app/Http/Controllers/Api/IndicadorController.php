@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
@@ -11,6 +13,8 @@ use App\Http\Requests\UpdateIndicadorRequest;
 use App\Services\IndicadorService;
 use App\DTOs\CreateIndicadorDTO;
 use App\DTOs\UpdateIndicadorDTO;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Http\JsonResponse;
 
 class IndicadorController extends Controller
 {
@@ -21,13 +25,13 @@ class IndicadorController extends Controller
         $this->indicadorService = $indicadorService;
     }
 
-    public function index()
+    public function index(): AnonymousResourceCollection
     {
         $indicadores = Indicador::with('responsable', 'valores')->where('activo', true)->paginate(15);
         return IndicadorResource::collection($indicadores);
     }
 
-    public function store(StoreIndicadorRequest $request)
+    public function store(StoreIndicadorRequest $request): JsonResponse
     {
         $dto = CreateIndicadorDTO::fromArray($request->validated());
         $indicador = $this->indicadorService->createIndicador($dto, $request->user());
@@ -36,13 +40,13 @@ class IndicadorController extends Controller
             ->setStatusCode(201);
     }
 
-    public function show($id)
+    public function show($id): IndicadorResource
     {
         $indicador = Indicador::with('responsable', 'valores.registradoPor')->findOrFail($id);
         return new IndicadorResource($indicador);
     }
 
-    public function update(UpdateIndicadorRequest $request, $id)
+    public function update(UpdateIndicadorRequest $request, $id): IndicadorResource
     {
         $indicador = Indicador::findOrFail($id);
         $dto = UpdateIndicadorDTO::fromArray($request->validated());
@@ -50,7 +54,7 @@ class IndicadorController extends Controller
         return new IndicadorResource($indicador->load('responsable'));
     }
 
-    public function destroy($id)
+    public function destroy($id): JsonResponse
     {
         $indicador = Indicador::findOrFail($id);
         $this->indicadorService->deactivateIndicador($indicador, request()->user());

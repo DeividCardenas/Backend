@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\DTOs\CreateReunionDTO;
@@ -42,7 +44,6 @@ class ReunionService
             if ($dto->archivo_acta) {
                 $data['archivo_acta'] = $dto->archivo_acta->store('actas', 'public');
             } else {
-                 // If null is sent, do we delete the file? Assuming yes if it is 'defined' as null.
                  $data['archivo_acta'] = null;
             }
         }
