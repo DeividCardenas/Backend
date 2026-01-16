@@ -20,7 +20,8 @@ class RolTest extends TestCase
         $response = $this->actingAs($user)->getJson('/api/roles');
 
         $response->assertStatus(200)
-                 ->assertJsonCount(3);
+                 ->assertJsonCount(3, 'data')
+                 ->assertJsonStructure(['data', 'current_page', 'last_page']);
     }
 
     public function test_store_creates_new_role()

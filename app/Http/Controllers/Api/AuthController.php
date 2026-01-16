@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use App\Http\Requests\RegisterRequest;
 use App\Http\Requests\LoginRequest;
 
@@ -22,6 +23,8 @@ class AuthController extends Controller
             'activo'   => true,
         ]);
 
+        Log::info('Nuevo usuario registrado: ' . $user->correo);
+
         return response()->json([
             'user'  => $user,
             'token' => $user->createToken('main')->plainTextToken
@@ -35,8 +38,11 @@ class AuthController extends Controller
         $user = User::where('correo', $validated['correo'])->first();
 
         if (! $user || ! $user->activo || ! Hash::check($validated['password'], $user->password)) {
+            Log::warning('Intento de login fallido: ' . $validated['correo']);
             return response()->json(['message' => 'Credenciales inválidas'], 401);
         }
+
+        Log::info('Usuario logueado: ' . $user->correo);
 
         return response()->json([
             'user'  => $user,
@@ -51,7 +57,10 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
-        $request->user()->currentAccessToken()->delete();
+        $user = $request->user();
+        $user->currentAccessToken()->delete();
+
+        Log::info('Usuario cerró sesión: ' . $user->correo);
 
         return response()->json(['message' => 'Sesión cerrada']);
     }
