@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Indicador;
 use Illuminate\Http\Request;
+use App\Http\Requests\StoreIndicadorRequest;
+use App\Http\Requests\UpdateIndicadorRequest;
 
 class IndicadorController extends Controller
 {
@@ -14,19 +16,9 @@ class IndicadorController extends Controller
         return response()->json($indicadores);
     }
 
-    public function store(Request $request)
+    public function store(StoreIndicadorRequest $request)
     {
-        $validated = $request->validate([
-            'nombre' => 'required|string|max:255',
-            'descripcion' => 'nullable|string',
-            'formula' => 'nullable|string',
-            'meta' => 'nullable|string',
-            'unidad' => 'nullable|string|max:50',
-            'responsable_id' => 'nullable|exists:usuarios,id_usuario',
-            'id_norma' => 'nullable|integer',
-            'activo' => 'boolean',
-        ]);
-
+        $validated = $request->validated();
         $indicador = Indicador::create($validated);
         return response()->json($indicador->load('responsable'), 201);
     }
@@ -37,19 +29,9 @@ class IndicadorController extends Controller
         return response()->json($indicador);
     }
 
-    public function update(Request $request, $id)
+    public function update(UpdateIndicadorRequest $request, $id)
     {
-        $validated = $request->validate([
-            'nombre' => 'sometimes|required|string|max:255',
-            'descripcion' => 'nullable|string',
-            'formula' => 'nullable|string',
-            'meta' => 'nullable|string',
-            'unidad' => 'nullable|string|max:50',
-            'responsable_id' => 'nullable|exists:usuarios,id_usuario',
-            'id_norma' => 'nullable|integer',
-            'activo' => 'boolean',
-        ]);
-
+        $validated = $request->validated();
         $indicador = Indicador::findOrFail($id);
         $indicador->update($validated);
         return response()->json($indicador->load('responsable'));

@@ -6,21 +6,19 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use App\Http\Requests\RegisterRequest;
+use App\Http\Requests\LoginRequest;
 
 class AuthController extends Controller
 {
-    public function register(Request $request)
+    public function register(RegisterRequest $request)
     {
-        $request->validate([
-            'nombre' => 'required|string|max:60',
-            'correo' => 'required|email|unique:usuarios,correo',
-            'password' => 'required|min:8|confirmed',
-        ]);
+        $validated = $request->validated();
 
         $user = User::create([
-            'nombre'   => $request->nombre,
-            'correo'   => $request->correo,
-            'password' => Hash::make($request->password),
+            'nombre'   => $validated['nombre'],
+            'correo'   => $validated['correo'],
+            'password' => Hash::make($validated['password']),
             'activo'   => true,
         ]);
 
@@ -30,16 +28,13 @@ class AuthController extends Controller
         ], 201);
     }
 
-    public function login(Request $request)
+    public function login(LoginRequest $request)
     {
-        $request->validate([
-            'correo'   => 'required|email',
-            'password' => 'required'
-        ]);
+        $validated = $request->validated();
 
-        $user = User::where('correo', $request->correo)->first();
+        $user = User::where('correo', $validated['correo'])->first();
 
-        if (! $user || ! $user->activo || ! Hash::check($request->password, $user->password)) {
+        if (! $user || ! $user->activo || ! Hash::check($validated['password'], $user->password)) {
             return response()->json(['message' => 'Credenciales inválidas'], 401);
         }
 

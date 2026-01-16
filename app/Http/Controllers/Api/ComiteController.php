@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Comite;
 use Illuminate\Http\Request;
+use App\Http\Requests\StoreComiteRequest;
+use App\Http\Requests\UpdateComiteRequest;
 
 class ComiteController extends Controller
 {
@@ -14,15 +16,9 @@ class ComiteController extends Controller
         return response()->json($comites);
     }
 
-    public function store(Request $request)
+    public function store(StoreComiteRequest $request)
     {
-        $validated = $request->validate([
-            'nombre' => 'required|string|max:255',
-            'objetivo' => 'required|string',
-            'responsable_id' => 'nullable|exists:usuarios,id_usuario',
-            'miembros' => 'array',
-            'miembros.*' => 'exists:usuarios,id_usuario',
-        ]);
+        $validated = $request->validated();
 
         $comite = Comite::create([
             'nombre' => $validated['nombre'],
@@ -43,15 +39,9 @@ class ComiteController extends Controller
         return response()->json($comite);
     }
 
-    public function update(Request $request, $id)
+    public function update(UpdateComiteRequest $request, $id)
     {
-        $validated = $request->validate([
-            'nombre' => 'sometimes|required|string|max:255',
-            'objetivo' => 'sometimes|required|string',
-            'responsable_id' => 'nullable|exists:usuarios,id_usuario',
-            'miembros' => 'array',
-            'miembros.*' => 'exists:usuarios,id_usuario',
-        ]);
+        $validated = $request->validated();
 
         $comite = Comite::findOrFail($id);
         $comite->update($validated);

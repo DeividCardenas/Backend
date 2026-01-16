@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Rol;
 use Illuminate\Http\Request;
+use App\Http\Requests\StoreRolRequest;
+use App\Http\Requests\UpdateRolRequest;
 
 class RolController extends Controller
 {
@@ -14,14 +16,9 @@ class RolController extends Controller
         return response()->json($roles);
     }
 
-    public function store(Request $request)
+    public function store(StoreRolRequest $request)
     {
-        $validated = $request->validate([
-            'nombre' => 'required|string|max:255',
-            'descripcion' => 'nullable|string',
-            'permisos' => 'array',
-            'permisos.*' => 'exists:permisos,id_permiso',
-        ]);
+        $validated = $request->validated();
 
         $rol = Rol::create([
             'nombre' => $validated['nombre'],
@@ -41,14 +38,9 @@ class RolController extends Controller
         return response()->json($rol);
     }
 
-    public function update(Request $request, $id)
+    public function update(UpdateRolRequest $request, $id)
     {
-        $validated = $request->validate([
-            'nombre' => 'sometimes|required|string|max:255',
-            'descripcion' => 'nullable|string',
-            'permisos' => 'array',
-            'permisos.*' => 'exists:permisos,id_permiso',
-        ]);
+        $validated = $request->validated();
 
         $rol = Rol::findOrFail($id);
         $rol->update($validated);

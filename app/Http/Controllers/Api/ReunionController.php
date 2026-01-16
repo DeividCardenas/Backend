@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Reunion;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use App\Http\Requests\StoreReunionRequest;
+use App\Http\Requests\UpdateReunionRequest;
 
 class ReunionController extends Controller
 {
@@ -21,15 +23,9 @@ class ReunionController extends Controller
         return response()->json($reuniones);
     }
 
-    public function store(Request $request)
+    public function store(StoreReunionRequest $request)
     {
-        $validated = $request->validate([
-            'id_comite' => 'required|exists:comites,id_comite',
-            'fecha' => 'required|date',
-            'tema' => 'required|string',
-            'acuerdos' => 'nullable|string',
-            'archivo_acta' => 'nullable|file|mimes:pdf,doc,docx|max:10240',
-        ]);
+        $validated = $request->validated();
 
         if ($request->hasFile('archivo_acta')) {
             $validated['archivo_acta'] = $request->file('archivo_acta')->store('actas', 'public');
@@ -45,15 +41,9 @@ class ReunionController extends Controller
         return response()->json($reunion);
     }
 
-    public function update(Request $request, $id)
+    public function update(UpdateReunionRequest $request, $id)
     {
-        $validated = $request->validate([
-            'id_comite' => 'sometimes|required|exists:comites,id_comite',
-            'fecha' => 'sometimes|required|date',
-            'tema' => 'sometimes|required|string',
-            'acuerdos' => 'nullable|string',
-            'archivo_acta' => 'nullable|file|mimes:pdf,doc,docx|max:10240',
-        ]);
+        $validated = $request->validated();
 
         $reunion = Reunion::findOrFail($id);
 

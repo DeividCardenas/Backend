@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use App\Http\Requests\StoreUserRequest;
+use App\Http\Requests\UpdateUserRequest;
 
 class UserController extends Controller
 {
@@ -15,16 +17,9 @@ class UserController extends Controller
         return response()->json($usuarios);
     }
 
-    public function store(Request $request)
+    public function store(StoreUserRequest $request)
     {
-        $validated = $request->validate([
-            'nombre' => 'required|string|max:60',
-            'correo' => 'required|email|unique:usuarios,correo',
-            'password' => 'required|min:8|confirmed',
-            'activo' => 'boolean',
-            'roles' => 'array',
-            'roles.*' => 'exists:roles,id_rol',
-        ]);
+        $validated = $request->validated();
 
         $user = User::create([
             'nombre' => $validated['nombre'],
@@ -46,17 +41,9 @@ class UserController extends Controller
         return response()->json($user);
     }
 
-    public function update(Request $request, $id)
+    public function update(UpdateUserRequest $request, $id)
     {
-        $validated = $request->validate([
-            'nombre' => 'sometimes|required|string|max:60',
-            'correo' => 'sometimes|required|email|unique:usuarios,correo,' . $id . ',id_usuario',
-            'password' => 'sometimes|min:8|confirmed',
-            'activo' => 'boolean',
-            'roles' => 'array',
-            'roles.*' => 'exists:roles,id_rol',
-        ]);
-
+        $validated = $request->validated();
         $user = User::findOrFail($id);
 
         if (isset($validated['password'])) {
@@ -79,4 +66,3 @@ class UserController extends Controller
         return response()->json(['message' => 'Usuario desactivado correctamente']);
     }
 }
-
