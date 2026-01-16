@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
@@ -10,6 +12,8 @@ use App\Http\Requests\UpdateUserRequest;
 use App\Services\UserService;
 use App\DTOs\CreateUserDTO;
 use App\DTOs\UpdateUserDTO;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Http\JsonResponse;
 
 class UserController extends Controller
 {
@@ -20,13 +24,13 @@ class UserController extends Controller
         $this->userService = $userService;
     }
 
-    public function index()
+    public function index(): AnonymousResourceCollection
     {
         $usuarios = User::with('roles')->where('activo', true)->paginate(15);
         return UserResource::collection($usuarios);
     }
 
-    public function store(StoreUserRequest $request)
+    public function store(StoreUserRequest $request): JsonResponse
     {
         $dto = CreateUserDTO::fromArray($request->validated());
         $user = $this->userService->createUser($dto, $request->user());
@@ -35,13 +39,13 @@ class UserController extends Controller
             ->setStatusCode(201);
     }
 
-    public function show($id)
+    public function show($id): UserResource
     {
         $user = User::with('roles', 'comitesResponsable', 'comitesMiembro')->findOrFail($id);
         return new UserResource($user);
     }
 
-    public function update(UpdateUserRequest $request, $id)
+    public function update(UpdateUserRequest $request, $id): UserResource
     {
         $user = User::findOrFail($id);
         $dto = UpdateUserDTO::fromArray($request->validated());
@@ -49,7 +53,7 @@ class UserController extends Controller
         return new UserResource($user->load('roles'));
     }
 
-    public function destroy($id)
+    public function destroy($id): JsonResponse
     {
         $user = User::findOrFail($id);
         $this->userService->deactivateUser($user, request()->user());

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
@@ -8,10 +10,12 @@ use Illuminate\Http\Request;
 use App\Http\Resources\IndicadorValorResource;
 use App\Http\Requests\StoreIndicadorValorRequest;
 use App\Http\Requests\UpdateIndicadorValorRequest;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Http\JsonResponse;
 
 class IndicadorValorController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request): AnonymousResourceCollection
     {
         $query = IndicadorValor::with('indicador', 'registradoPor');
 
@@ -23,7 +27,7 @@ class IndicadorValorController extends Controller
         return IndicadorValorResource::collection($valores);
     }
 
-    public function store(StoreIndicadorValorRequest $request)
+    public function store(StoreIndicadorValorRequest $request): JsonResponse
     {
         $validated = $request->validated();
 
@@ -35,13 +39,13 @@ class IndicadorValorController extends Controller
             ->setStatusCode(201);
     }
 
-    public function show($id)
+    public function show($id): IndicadorValorResource
     {
         $valor = IndicadorValor::with('indicador', 'registradoPor')->findOrFail($id);
         return new IndicadorValorResource($valor);
     }
 
-    public function update(UpdateIndicadorValorRequest $request, $id)
+    public function update(UpdateIndicadorValorRequest $request, $id): IndicadorValorResource
     {
         $validated = $request->validated();
 
@@ -50,7 +54,7 @@ class IndicadorValorController extends Controller
         return new IndicadorValorResource($valor->load('indicador', 'registradoPor'));
     }
 
-    public function destroy($id)
+    public function destroy($id): JsonResponse
     {
         $valor = IndicadorValor::findOrFail($id);
         $valor->delete();
