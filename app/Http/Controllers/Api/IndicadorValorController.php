@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\IndicadorValor;
 use Illuminate\Http\Request;
+use App\Http\Requests\StoreIndicadorValorRequest;
+use App\Http\Requests\UpdateIndicadorValorRequest;
 
 class IndicadorValorController extends Controller
 {
@@ -20,14 +22,9 @@ class IndicadorValorController extends Controller
         return response()->json($valores);
     }
 
-    public function store(Request $request)
+    public function store(StoreIndicadorValorRequest $request)
     {
-        $validated = $request->validate([
-            'id_indicador' => 'required|exists:indicadores,id_indicador',
-            'valor' => 'required|numeric',
-            'fecha' => 'required|date',
-            'observaciones' => 'nullable|string',
-        ]);
+        $validated = $request->validated();
 
         $validated['registrado_por'] = $request->user()->id_usuario;
 
@@ -41,14 +38,9 @@ class IndicadorValorController extends Controller
         return response()->json($valor);
     }
 
-    public function update(Request $request, $id)
+    public function update(UpdateIndicadorValorRequest $request, $id)
     {
-        $validated = $request->validate([
-            'id_indicador' => 'sometimes|required|exists:indicadores,id_indicador',
-            'valor' => 'sometimes|required|numeric',
-            'fecha' => 'sometimes|required|date',
-            'observaciones' => 'nullable|string',
-        ]);
+        $validated = $request->validated();
 
         $valor = IndicadorValor::findOrFail($id);
         $valor->update($validated);

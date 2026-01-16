@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Permiso;
 use Illuminate\Http\Request;
+use App\Http\Requests\StorePermisoRequest;
+use App\Http\Requests\UpdatePermisoRequest;
 
 class PermisoController extends Controller
 {
@@ -14,13 +16,9 @@ class PermisoController extends Controller
         return response()->json($permisos);
     }
 
-    public function store(Request $request)
+    public function store(StorePermisoRequest $request)
     {
-        $validated = $request->validate([
-            'nombre' => 'required|string|max:255',
-            'descripcion' => 'nullable|string',
-        ]);
-
+        $validated = $request->validated();
         $permiso = Permiso::create($validated);
         return response()->json($permiso, 201);
     }
@@ -31,13 +29,9 @@ class PermisoController extends Controller
         return response()->json($permiso);
     }
 
-    public function update(Request $request, $id)
+    public function update(UpdatePermisoRequest $request, $id)
     {
-        $validated = $request->validate([
-            'nombre' => 'sometimes|required|string|max:255',
-            'descripcion' => 'nullable|string',
-        ]);
-
+        $validated = $request->validated();
         $permiso = Permiso::findOrFail($id);
         $permiso->update($validated);
         return response()->json($permiso);
