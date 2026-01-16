@@ -5,12 +5,19 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Reunion;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\StoreReunionRequest;
 use App\Http\Requests\UpdateReunionRequest;
+use App\Services\ReunionService;
 
 class ReunionController extends Controller
 {
+    protected $reunionService;
+
+    public function __construct(ReunionService $reunionService)
+    {
+        $this->reunionService = $reunionService;
+    }
+
     public function index(Request $request)
     {
         $query = Reunion::with('comite');
@@ -25,13 +32,10 @@ class ReunionController extends Controller
 
     public function store(StoreReunionRequest $request)
     {
-        $validated = $request->validated();
-
-        if ($request->hasFile('archivo_acta')) {
-            $validated['archivo_acta'] = $request->file('archivo_acta')->store('actas', 'public');
-        }
-
-        $reunion = Reunion::create($validated);
+        $reunion = $this->reunionService->createReunion(
+            $request->validated(),
+            $request->file('archivo_acta')
+        );
         return response()->json($reunion->load('comite'), 201);
     }
 
@@ -43,30 +47,19 @@ class ReunionController extends Controller
 
     public function update(UpdateReunionRequest $request, $id)
     {
-        $validated = $request->validated();
-
         $reunion = Reunion::findOrFail($id);
-
-        if ($request->hasFile('archivo_acta')) {
-            if ($reunion->archivo_acta) {
-                Storage::disk('public')->delete($reunion->archivo_acta);
-            }
-            $validated['archivo_acta'] = $request->file('archivo_acta')->store('actas', 'public');
-        }
-
-        $reunion->update($validated);
+        $reunion = $this->reunionService->updateReunion(
+            $reunion,
+            $request->validated(),
+            $request->file('archivo_acta')
+        );
         return response()->json($reunion->load('comite'));
     }
 
     public function destroy($id)
     {
         $reunion = Reunion::findOrFail($id);
-
-        if ($reunion->archivo_acta) {
-            Storage::disk('public')->delete($reunion->archivo_acta);
-        }
-
-        $reunion->delete();
+        $this->reunionService->deleteReunion($reunion);
         return response()->json(['message' => 'Reunión eliminada correctamente']);
     }
 }
