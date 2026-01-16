@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Reunion;
 use Illuminate\Http\Request;
+use App\Http\Resources\ReunionResource;
 use App\Http\Requests\StoreReunionRequest;
 use App\Http\Requests\UpdateReunionRequest;
 use App\Services\ReunionService;
@@ -27,7 +28,7 @@ class ReunionController extends Controller
         }
 
         $reuniones = $query->orderBy('fecha', 'desc')->paginate(15);
-        return response()->json($reuniones);
+        return ReunionResource::collection($reuniones);
     }
 
     public function store(StoreReunionRequest $request)
@@ -36,13 +37,15 @@ class ReunionController extends Controller
             $request->validated(),
             $request->file('archivo_acta')
         );
-        return response()->json($reunion->load('comite'), 201);
+        return (new ReunionResource($reunion->load('comite')))
+            ->response()
+            ->setStatusCode(201);
     }
 
     public function show($id)
     {
         $reunion = Reunion::with('comite')->findOrFail($id);
-        return response()->json($reunion);
+        return new ReunionResource($reunion);
     }
 
     public function update(UpdateReunionRequest $request, $id)
@@ -53,7 +56,7 @@ class ReunionController extends Controller
             $request->validated(),
             $request->file('archivo_acta')
         );
-        return response()->json($reunion->load('comite'));
+        return new ReunionResource($reunion->load('comite'));
     }
 
     public function destroy($id)

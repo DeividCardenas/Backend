@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\IndicadorValor;
 use Illuminate\Http\Request;
+use App\Http\Resources\IndicadorValorResource;
 use App\Http\Requests\StoreIndicadorValorRequest;
 use App\Http\Requests\UpdateIndicadorValorRequest;
 
@@ -19,7 +20,7 @@ class IndicadorValorController extends Controller
         }
 
         $valores = $query->orderBy('fecha', 'desc')->paginate(15);
-        return response()->json($valores);
+        return IndicadorValorResource::collection($valores);
     }
 
     public function store(StoreIndicadorValorRequest $request)
@@ -29,13 +30,15 @@ class IndicadorValorController extends Controller
         $validated['registrado_por'] = $request->user()->id_usuario;
 
         $valor = IndicadorValor::create($validated);
-        return response()->json($valor->load('indicador', 'registradoPor'), 201);
+        return (new IndicadorValorResource($valor->load('indicador', 'registradoPor')))
+            ->response()
+            ->setStatusCode(201);
     }
 
     public function show($id)
     {
         $valor = IndicadorValor::with('indicador', 'registradoPor')->findOrFail($id);
-        return response()->json($valor);
+        return new IndicadorValorResource($valor);
     }
 
     public function update(UpdateIndicadorValorRequest $request, $id)
@@ -44,7 +47,7 @@ class IndicadorValorController extends Controller
 
         $valor = IndicadorValor::findOrFail($id);
         $valor->update($validated);
-        return response()->json($valor->load('indicador', 'registradoPor'));
+        return new IndicadorValorResource($valor->load('indicador', 'registradoPor'));
     }
 
     public function destroy($id)

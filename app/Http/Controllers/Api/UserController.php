@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Http\Resources\UserResource;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
 use App\Services\UserService;
@@ -20,26 +21,28 @@ class UserController extends Controller
     public function index()
     {
         $usuarios = User::with('roles')->where('activo', true)->paginate(15);
-        return response()->json($usuarios);
+        return UserResource::collection($usuarios);
     }
 
     public function store(StoreUserRequest $request)
     {
         $user = $this->userService->createUser($request->validated(), $request->user());
-        return response()->json($user->load('roles'), 201);
+        return (new UserResource($user->load('roles')))
+            ->response()
+            ->setStatusCode(201);
     }
 
     public function show($id)
     {
         $user = User::with('roles', 'comitesResponsable', 'comitesMiembro')->findOrFail($id);
-        return response()->json($user);
+        return new UserResource($user);
     }
 
     public function update(UpdateUserRequest $request, $id)
     {
         $user = User::findOrFail($id);
         $user = $this->userService->updateUser($user, $request->validated(), $request->user());
-        return response()->json($user->load('roles'));
+        return new UserResource($user->load('roles'));
     }
 
     public function destroy($id)
