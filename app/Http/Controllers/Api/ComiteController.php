@@ -4,13 +4,19 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Comite;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use App\Http\Requests\StoreComiteRequest;
 use App\Http\Requests\UpdateComiteRequest;
+use App\Services\ComiteService;
 
 class ComiteController extends Controller
 {
+    protected $comiteService;
+
+    public function __construct(ComiteService $comiteService)
+    {
+        $this->comiteService = $comiteService;
+    }
+
     public function index()
     {
         $comites = Comite::with('responsable', 'miembros')->paginate(15);
@@ -19,20 +25,7 @@ class ComiteController extends Controller
 
     public function store(StoreComiteRequest $request)
     {
-        $validated = $request->validated();
-
-        $comite = Comite::create([
-            'nombre' => $validated['nombre'],
-            'objetivo' => $validated['objetivo'],
-            'responsable_id' => $validated['responsable_id'] ?? null,
-        ]);
-
-        if (isset($validated['miembros'])) {
-            $comite->miembros()->attach($validated['miembros']);
-        }
-
-        Log::info('Comité creado por ' . $request->user()->correo . ': ' . $comite->nombre);
-
+        $comite = $this->comiteService->createComite($request->validated(), $request->user());
         return response()->json($comite->load('responsable', 'miembros'), 201);
     }
 
@@ -44,28 +37,15 @@ class ComiteController extends Controller
 
     public function update(UpdateComiteRequest $request, $id)
     {
-        $validated = $request->validated();
-
         $comite = Comite::findOrFail($id);
-        $comite->update($validated);
-
-        if (isset($validated['miembros'])) {
-            $comite->miembros()->sync($validated['miembros']);
-        }
-
-        Log::info('Comité actualizado por ' . $request->user()->correo . ': ' . $comite->nombre);
-
+        $comite = $this->comiteService->updateComite($comite, $request->validated(), $request->user());
         return response()->json($comite->load('responsable', 'miembros'));
     }
 
     public function destroy($id)
     {
         $comite = Comite::findOrFail($id);
-        $nombre = $comite->nombre;
-        $comite->delete();
-
-        Log::info('Comité eliminado por ' . request()->user()->correo . ': ' . $nombre);
-
+        $this->comiteService->deleteComite($comite, request()->user());
         return response()->json(['message' => 'Comité eliminado correctamente']);
     }
 }
