@@ -9,6 +9,8 @@ use App\Http\Resources\IndicadorResource;
 use App\Http\Requests\StoreIndicadorRequest;
 use App\Http\Requests\UpdateIndicadorRequest;
 use App\Services\IndicadorService;
+use App\DTOs\CreateIndicadorDTO;
+use App\DTOs\UpdateIndicadorDTO;
 
 class IndicadorController extends Controller
 {
@@ -27,7 +29,8 @@ class IndicadorController extends Controller
 
     public function store(StoreIndicadorRequest $request)
     {
-        $indicador = $this->indicadorService->createIndicador($request->validated(), $request->user());
+        $dto = CreateIndicadorDTO::fromArray($request->validated());
+        $indicador = $this->indicadorService->createIndicador($dto, $request->user());
         return (new IndicadorResource($indicador->load('responsable')))
             ->response()
             ->setStatusCode(201);
@@ -42,7 +45,8 @@ class IndicadorController extends Controller
     public function update(UpdateIndicadorRequest $request, $id)
     {
         $indicador = Indicador::findOrFail($id);
-        $indicador = $this->indicadorService->updateIndicador($indicador, $request->validated(), $request->user());
+        $dto = UpdateIndicadorDTO::fromArray($request->validated());
+        $indicador = $this->indicadorService->updateIndicador($indicador, $dto, $request->user());
         return new IndicadorResource($indicador->load('responsable'));
     }
 

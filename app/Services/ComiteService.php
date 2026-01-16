@@ -2,22 +2,24 @@
 
 namespace App\Services;
 
+use App\DTOs\CreateComiteDTO;
+use App\DTOs\UpdateComiteDTO;
 use App\Models\Comite;
 use App\Models\User;
 use Illuminate\Support\Facades\Log;
 
 class ComiteService
 {
-    public function createComite(array $data, ?User $creator = null): Comite
+    public function createComite(CreateComiteDTO $dto, ?User $creator = null): Comite
     {
         $comite = Comite::create([
-            'nombre' => $data['nombre'],
-            'objetivo' => $data['objetivo'],
-            'responsable_id' => $data['responsable_id'] ?? null,
+            'nombre' => $dto->nombre,
+            'objetivo' => $dto->objetivo,
+            'responsable_id' => $dto->responsable_id,
         ]);
 
-        if (isset($data['miembros'])) {
-            $comite->miembros()->attach($data['miembros']);
+        if ($dto->miembros) {
+            $comite->miembros()->attach($dto->miembros);
         }
 
         if ($creator) {
@@ -27,12 +29,24 @@ class ComiteService
         return $comite;
     }
 
-    public function updateComite(Comite $comite, array $data, ?User $updater = null): Comite
+    public function updateComite(Comite $comite, UpdateComiteDTO $dto, ?User $updater = null): Comite
     {
-        $comite->update($data);
+        $updateData = [];
 
-        if (isset($data['miembros'])) {
-            $comite->miembros()->sync($data['miembros']);
+        if ($dto->isDefined('nombre')) {
+            $updateData['nombre'] = $dto->nombre;
+        }
+        if ($dto->isDefined('objetivo')) {
+            $updateData['objetivo'] = $dto->objetivo;
+        }
+        if ($dto->isDefined('responsable_id')) {
+            $updateData['responsable_id'] = $dto->responsable_id;
+        }
+
+        $comite->update($updateData);
+
+        if ($dto->isDefined('miembros')) {
+            $comite->miembros()->sync($dto->miembros);
         }
 
         if ($updater) {

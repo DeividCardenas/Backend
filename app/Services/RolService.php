@@ -2,21 +2,23 @@
 
 namespace App\Services;
 
+use App\DTOs\CreateRolDTO;
+use App\DTOs\UpdateRolDTO;
 use App\Models\Rol;
 use App\Models\User;
 use Illuminate\Support\Facades\Log;
 
 class RolService
 {
-    public function createRol(array $data, ?User $creator = null): Rol
+    public function createRol(CreateRolDTO $dto, ?User $creator = null): Rol
     {
         $rol = Rol::create([
-            'nombre' => $data['nombre'],
-            'descripcion' => $data['descripcion'] ?? null,
+            'nombre' => $dto->nombre,
+            'descripcion' => $dto->descripcion,
         ]);
 
-        if (isset($data['permisos'])) {
-            $rol->permisos()->attach($data['permisos']);
+        if ($dto->permisos) {
+            $rol->permisos()->attach($dto->permisos);
         }
 
         if ($creator) {
@@ -26,12 +28,21 @@ class RolService
         return $rol;
     }
 
-    public function updateRol(Rol $rol, array $data, ?User $updater = null): Rol
+    public function updateRol(Rol $rol, UpdateRolDTO $dto, ?User $updater = null): Rol
     {
-        $rol->update($data);
+        $updateData = [];
 
-        if (isset($data['permisos'])) {
-            $rol->permisos()->sync($data['permisos']);
+        if ($dto->isDefined('nombre')) {
+            $updateData['nombre'] = $dto->nombre;
+        }
+        if ($dto->isDefined('descripcion')) {
+            $updateData['descripcion'] = $dto->descripcion;
+        }
+
+        $rol->update($updateData);
+
+        if ($dto->isDefined('permisos')) {
+            $rol->permisos()->sync($dto->permisos);
         }
 
         if ($updater) {

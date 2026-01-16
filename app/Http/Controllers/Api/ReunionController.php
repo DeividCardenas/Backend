@@ -9,6 +9,8 @@ use App\Http\Resources\ReunionResource;
 use App\Http\Requests\StoreReunionRequest;
 use App\Http\Requests\UpdateReunionRequest;
 use App\Services\ReunionService;
+use App\DTOs\CreateReunionDTO;
+use App\DTOs\UpdateReunionDTO;
 
 class ReunionController extends Controller
 {
@@ -33,10 +35,8 @@ class ReunionController extends Controller
 
     public function store(StoreReunionRequest $request)
     {
-        $reunion = $this->reunionService->createReunion(
-            $request->validated(),
-            $request->file('archivo_acta')
-        );
+        $dto = CreateReunionDTO::fromArray($request->validated(), $request->file('archivo_acta'));
+        $reunion = $this->reunionService->createReunion($dto);
         return (new ReunionResource($reunion->load('comite')))
             ->response()
             ->setStatusCode(201);
@@ -51,11 +51,8 @@ class ReunionController extends Controller
     public function update(UpdateReunionRequest $request, $id)
     {
         $reunion = Reunion::findOrFail($id);
-        $reunion = $this->reunionService->updateReunion(
-            $reunion,
-            $request->validated(),
-            $request->file('archivo_acta')
-        );
+        $dto = UpdateReunionDTO::fromArray($request->validated(), $request->file('archivo_acta'));
+        $reunion = $this->reunionService->updateReunion($reunion, $dto);
         return new ReunionResource($reunion->load('comite'));
     }
 
