@@ -8,6 +8,8 @@ use App\Http\Resources\UserResource;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
 use App\Services\UserService;
+use App\DTOs\CreateUserDTO;
+use App\DTOs\UpdateUserDTO;
 
 class UserController extends Controller
 {
@@ -26,7 +28,8 @@ class UserController extends Controller
 
     public function store(StoreUserRequest $request)
     {
-        $user = $this->userService->createUser($request->validated(), $request->user());
+        $dto = CreateUserDTO::fromArray($request->validated());
+        $user = $this->userService->createUser($dto, $request->user());
         return (new UserResource($user->load('roles')))
             ->response()
             ->setStatusCode(201);
@@ -41,7 +44,8 @@ class UserController extends Controller
     public function update(UpdateUserRequest $request, $id)
     {
         $user = User::findOrFail($id);
-        $user = $this->userService->updateUser($user, $request->validated(), $request->user());
+        $dto = UpdateUserDTO::fromArray($request->validated());
+        $user = $this->userService->updateUser($user, $dto, $request->user());
         return new UserResource($user->load('roles'));
     }
 

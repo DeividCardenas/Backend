@@ -8,6 +8,8 @@ use App\Http\Resources\ComiteResource;
 use App\Http\Requests\StoreComiteRequest;
 use App\Http\Requests\UpdateComiteRequest;
 use App\Services\ComiteService;
+use App\DTOs\CreateComiteDTO;
+use App\DTOs\UpdateComiteDTO;
 
 class ComiteController extends Controller
 {
@@ -26,7 +28,8 @@ class ComiteController extends Controller
 
     public function store(StoreComiteRequest $request)
     {
-        $comite = $this->comiteService->createComite($request->validated(), $request->user());
+        $dto = CreateComiteDTO::fromArray($request->validated());
+        $comite = $this->comiteService->createComite($dto, $request->user());
         return (new ComiteResource($comite->load('responsable', 'miembros')))
             ->response()
             ->setStatusCode(201);
@@ -41,7 +44,8 @@ class ComiteController extends Controller
     public function update(UpdateComiteRequest $request, $id)
     {
         $comite = Comite::findOrFail($id);
-        $comite = $this->comiteService->updateComite($comite, $request->validated(), $request->user());
+        $dto = UpdateComiteDTO::fromArray($request->validated());
+        $comite = $this->comiteService->updateComite($comite, $dto, $request->user());
         return new ComiteResource($comite->load('responsable', 'miembros'));
     }
 

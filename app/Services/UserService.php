@@ -2,23 +2,25 @@
 
 namespace App\Services;
 
+use App\DTOs\CreateUserDTO;
+use App\DTOs\UpdateUserDTO;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 
 class UserService
 {
-    public function createUser(array $data, ?User $creator = null): User
+    public function createUser(CreateUserDTO $dto, ?User $creator = null): User
     {
         $user = User::create([
-            'nombre' => $data['nombre'],
-            'correo' => $data['correo'],
-            'password' => Hash::make($data['password']),
-            'activo' => $data['activo'] ?? true,
+            'nombre' => $dto->nombre,
+            'correo' => $dto->correo,
+            'password' => Hash::make($dto->password),
+            'activo' => $dto->activo,
         ]);
 
-        if (isset($data['roles'])) {
-            $user->roles()->attach($data['roles']);
+        if ($dto->roles) {
+            $user->roles()->attach($dto->roles);
         }
 
         if ($creator) {
@@ -28,16 +30,27 @@ class UserService
         return $user;
     }
 
-    public function updateUser(User $user, array $data, ?User $updater = null): User
+    public function updateUser(User $user, UpdateUserDTO $dto, ?User $updater = null): User
     {
-        if (isset($data['password'])) {
-            $data['password'] = Hash::make($data['password']);
+        $updateData = [];
+
+        if ($dto->isDefined('nombre')) {
+            $updateData['nombre'] = $dto->nombre;
+        }
+        if ($dto->isDefined('correo')) {
+            $updateData['correo'] = $dto->correo;
+        }
+        if ($dto->isDefined('password')) {
+            $updateData['password'] = Hash::make($dto->password);
+        }
+        if ($dto->isDefined('activo')) {
+            $updateData['activo'] = $dto->activo;
         }
 
-        $user->update($data);
+        $user->update($updateData);
 
-        if (isset($data['roles'])) {
-            $user->roles()->sync($data['roles']);
+        if ($dto->isDefined('roles')) {
+            $user->roles()->sync($dto->roles);
         }
 
         if ($updater) {
