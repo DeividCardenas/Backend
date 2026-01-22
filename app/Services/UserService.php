@@ -70,4 +70,9 @@ class UserService
             Log::info('Usuario desactivado por ' . $deactivator->correo . ': ' . $user->correo);
         }
     }
+
+    public function getUserById(int $id): ?User
+    {
+        return User::find($id);
+    }
 }
