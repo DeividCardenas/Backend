@@ -32,7 +32,7 @@ try {
         'correo' => 'test@backend.com',
         'password' => bcrypt('password123')
     ]);
-    echo "✅ Usuario creado con ID: " . $user->id . "\n";
+    echo "✅ Usuario creado con ID: " . $user->id_usuario . "\n";
 } catch (\Throwable $e) {
     echo "❌ Error creando usuario: " . $e->getMessage() . "\n";
     exit(1);
